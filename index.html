@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator</title>
+<style>
+body{background:#222;display:flex;justify-content:center;padding:20px;font-family:Arial}
+.calc{background:#3a3f46;width:360px;border-radius:12px;padding:12px;box-shadow:0 10px 30px #000}
+.display{background:#d4e6c8;height:95px;border-radius:8px;padding:10px;text-align:right;position:relative}
+.display .top{font-size:11px;color:#555;display:flex;justify-content:space-between}
+.display .main{font-size:38px;margin-top:10px;overflow:hidden;white-space:nowrap}
+.row{display:flex;gap:6px;margin-top:6px}
+button{flex:1;height:42px;border-radius:8px;border:none;font-size:13px;font-weight:bold;cursor:pointer}
+.btn-dark{background:#2b2f33;color:#fff}
+.btn-gray{background:#a0a5ab;color:#000}
+.btn-green{background:#8bc34a;color:#000}
+.btn-red{background:#d32f2f;color:#fff}
+.btn-orange{background:#ff9800;color:#fff}
+small{font-size:9px;display:block;color:#444}
+</style>
+</head>
+<body>
+<div class="calc">
+<div class="display">
+<div class="top"><span id="mode">RAD M</span><span style="color:blue;text-decoration:underline;font-size:12px">Pro Version</span></div>
+<div class="main" id="screen">0</div>
+</div>
+
+<div class="row">
+<button class="btn-green" onclick="shift()">SHIFT<br><small>◄DRG</small></button>
+<button class="btn-gray" onclick="menu()">MENU</button>
+<button class="btn-red" onclick="del()">⌫</button>
+<button class="btn-red" onclick="ac()">AC</button>
+</div>
+<div class="row">
+<button class="btn-gray" onclick="func('sin_inv')">sin⁻¹</button>
+<button class="btn-gray" onclick="func('cos_inv')">cos⁻¹</button>
+<button class="btn-gray" onclick="func('tan_inv')">tan⁻¹</button>
+<button class="btn-gray" onclick="input('^')">xʸ</button>
+<button class="btn-gray" onclick="func('log')">log</button>
+<button class="btn-gray" onclick="func('ln')">ln</button>
+</div>
+<div class="row">
+<button class="btn-gray" onclick="func('hyp')">hyp</button>
+<button class="btn-gray" onclick="func('sin')">sin</button>
+<button class="btn-gray" onclick="func('cos')">cos</button>
+<button class="btn-gray" onclick="func('tan')">tan</button>
+<button class="btn-gray" onclick="constant(Math.PI)">π</button>
+<button class="btn-gray" onclick="constant(Math.E)">e</button>
+</div>
+<div class="row">
+<button class="btn-gray" onclick="func('cube')">x³</button>
+<button class="btn-gray" onclick="func('cbrt')">³√x</button>
+<button class="btn-gray" onclick="func('sq')">x²</button>
+<button class="btn-gray" onclick="func('sqrt')">√x</button>
+<button class="btn-gray" onclick="func('10x')">10ˣ</button>
+<button class="btn-gray" onclick="func('ex')">eˣ</button>
+</div>
+<div class="row">
+<button class="btn-gray" onclick="func('inv')">x⁻¹</button>
+<button class="btn-gray" onclick="percent()">%</button>
+<button class="btn-gray" style="color:blue" onclick="mem('RCL')">RCL</button>
+<button class="btn-gray" style="color:blue" onclick="mem('STO')">STO</button>
+<button class="btn-gray" style="color:blue" onclick="mem('MR')">MR</button>
+<button class="btn-gray" style="color:blue" onclick="mem('Mto')">M+</button>
+</div>
+
+<div class="row">
+<button class="btn-dark" onclick="input('7')">7</button>
+<button class="btn-dark" onclick="input('8')">8</button>
+<button class="btn-dark" onclick="input('9')">9</button>
+<button class="btn-gray" onclick="input('(')">(</button>
+<button class="btn-gray" onclick="input(')')')">)</button>
+</div>
+<div class="row">
+<button class="btn-dark" onclick="input('4')">4</button>
+<button class="btn-dark" onclick="input('5')">5</button>
+<button class="btn-dark" onclick="input('6')">6</button>
+<button class="btn-gray" onclick="input('*')">×</button>
+<button class="btn-gray" onclick="input('/')">÷</button>
+</div>
+<div class="row">
+<button class="btn-dark" onclick="input('1')">1</button>
+<button class="btn-dark" onclick="input('2')">2</button>
+<button class="btn-dark" onclick="input('3')">3</button>
+<button class="btn-gray" onclick="input('+')">+</button>
+<button class="btn-gray" onclick="input('-')">-</button>
+</div>
+<div class="row">
+<button class="btn-dark" onclick="input('0')">0</button>
+<button class="btn-dark" onclick="input('.')">.</button>
+<button class="btn-dark" onclick="toggleSign()">+/-</button>
+<button class="btn-gray" onclick="input('E')">EXP</button>
+<button class="btn-gray" onclick="calculate()">=</button>
+</div>
+</div>
+
+<script>
+let expr="", memVal=0, isRad=true;
+const screen=document.getElementById('screen');
+
+function update(s){ screen.textContent = s || '0'; }
+
+function input(v){
+  if(expr === 'Error') expr = '';
+  expr += v;
+  update(expr);
+}
+
+function ac(){ expr=""; update('0'); }
+function del(){ expr=expr.toString().slice(0,-1); update(expr); }
+
+function constant(val){
+  if(expr === 'Error') expr = '';
+  expr += val;
+  update(expr);
+}
+
+function func(f){
+  let x = parseFloat(expr);
+  if(isNaN(x)) x = 0;
+  try {
+    if(f=='sin') expr = Math.sin(isRad ? x : x * Math.PI / 180);
+    else if(f=='cos') expr = Math.cos(isRad ? x : x * Math.PI / 180);
+    else if(f=='tan') expr = Math.tan(isRad ? x : x * Math.PI / 180);
+    else if(f=='sin_inv') expr = isRad ? Math.asin(x) : Math.asin(x) * 180 / Math.PI;
+    else if(f=='cos_inv') expr = isRad ? Math.acos(x) : Math.acos(x) * 180 / Math.PI;
+    else if(f=='tan_inv') expr = isRad ? Math.atan(x) : Math.atan(x) * 180 / Math.PI;
+    else if(f=='sqrt') expr = Math.sqrt(x);
+    else if(f=='sq') expr = Math.pow(x, 2);
+    else if(f=='cube') expr = Math.pow(x, 3);
+    else if(f=='cbrt') expr = Math.cbrt(x);
+    else if(f=='inv') expr = 1 / x;
+    else if(f=='log') expr = Math.log10(x);
+    else if(f=='ln') expr = Math.log(x);
+    else if(f=='ex') expr = Math.exp(x);
+    else if(f=='10x') expr = Math.pow(10, x);
+    
+    expr = expr.toString();
+    update(expr);
+  } catch(e) {
+    expr = "Error";
+    update(expr);
+  }
+}
+
+function percent(){
+  let x = parseFloat(expr);
+  if(!isNaN(x)){
+    expr = (x / 100).toString();
+    update(expr);
+  }
+}
+
+function toggleSign(){
+  if(expr.startsWith('-')) expr = expr.slice(1);
+  else expr = '-' + expr;
+  update(expr);
+}
+
+function calculate(){
+  try {
+    // استبدال الرموز الرياضية بما يناسب لغة جافاسكريبت
+    let cleanExpr = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/\^/g, '**');
+    let result = eval(cleanExpr);
+    if(isFinite(result)){
+      expr = result.toString();
+      update(expr);
+    } else {
+      expr = "Error";
+      update(expr);
+    }
+  } catch(e) {
+    expr = "Error";
+    update(expr);
+  }
+}
+
+function mem(m){
+  let x = parseFloat(expr) || 0;
+  if(m=='STO') memVal = x;
+  if(m=='RCL' || m=='MR') { expr = memVal.toString(); update(expr); }
+  if(m=='Mto') memVal += x;
+}
+
+function shift(){ 
+  isRad = !isRad; 
+  document.getElementById('mode').textContent = (isRad ? 'RAD' : 'DEG') + ' M'; 
+}
+
+function menu(){ 
+  alert('وضع الزوايا الحالي: ' + (isRad ? 'Radiant (RAD)' : 'Degrees (DEG)')); 
+}
+</script>
+</body>
+</html>
